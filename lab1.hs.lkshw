@@ -1,0 +1,14 @@
+Version of workspace file format:
+               2
+Time of storage:
+               "Wed Mar 29 16:12:29 V\245steuropa, sommartid 2017"
+Name of the workspace:
+               "lab1.hs"
+File paths of contained packages:
+               ["d7012e\\d7012e.cabal"]
+Maybe file path of an active package:
+               Just "d7012e\\d7012e.cabal"
+Maybe name of an active executable:
+               Nothing
+Version Control System configurations for packages:
+               fromList []
