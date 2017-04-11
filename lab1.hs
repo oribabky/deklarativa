@@ -29,6 +29,8 @@ buildOutputString [] = ['\n']
 buildOutputString (x : xs) = ['\n'] ++ show x  ++ buildOutputString xs
 
 --main function to find smallest k set
-smallestK :: (Show t, Num t) => [t] -> String
-smallestK = buildOutputString . createSubLists
+smallestK :: (Show t, Num t, Ord t) => [t] -> Int -> String
+smallestK xs k = buildOutputString . take k . sortOnListSum . createSubLists $ xs
 
+main = do
+    putStrLn (smallestK [-1, 2, -3, 4, -5] 3)
