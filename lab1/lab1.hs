@@ -4,7 +4,7 @@ sumList :: Num t => [t] -> t
 sumList [] = 0
 sumList (x : xs) = x + sumList xs
 
---creates all possible sub sequences of a list in the format of a quadruple
+--creates all possible sub-sequences of a list in the format of quadruples containing the size, start/end index and the sublist itself.
 createSubListSequences :: Num t => [t] -> [(t, Int, Int, [t])]
 createSubListSequences [] = []
 createSubListSequences xs = [subListQuad xs i j | i <- [1 .. len], j <- [1 .. len], j >= i]
@@ -19,7 +19,7 @@ subListQuad xs i j = (size, i, j, list)
 		list = drop (i - 1) . take j $ xs
 		size = sumList list
 
---sorts a list of quads based on the first value in each quadruple
+--sorts a list of quads based on the first value in each quadruple. Variant of quicksort.
 sortOnSize :: (Ord t, Num t) => [(t, Int, Int, [t])] -> [(t, Int, Int, [t])]
 sortOnSize [] = []
 sortOnSize (x : xs) = sortOnSize lowerSizeLists ++ [x] ++ sortOnSize higherSizeLists
@@ -64,13 +64,14 @@ bufferSpace s k = s ++ take (k - len) [' ', ' ' ..]
 
 --main function to find smallest k set
 smallestK :: (Show t, Num t, Ord t) => [t] -> Int -> String
-smallestK [] k = "Need an input list with at least one element!"
+smallestK [] k = error "Need an input list with at least one element!"
 smallestK xs k = buildOutputString . take k . sortOnSize . createSubListSequences $ xs
 
 --main procedure, call this to invoke smallestK
+main' :: (Show t, Num t, Ord t) => [t] -> Int -> IO ()
+main' xs i = do putStrLn (smallestK xs i)
+
 main = do
-    putStrLn (smallestK [-1, 2, -3, 4, -5] 10)
-    putStrLn (['\n'] ++ smallestK [x*(-1)^x | x <- [1..100]] 15)
-    putStrLn (['\n'] ++ smallestK [24,-11,-34,42,-24,7,-19,21] 6)
-
-
+	main' [x*(-1)^x | x <- [1..100]] 15
+	main' [24,-11,-34,42,-24,7,-19,21] 6
+	main' [] 6
