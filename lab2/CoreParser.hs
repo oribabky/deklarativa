@@ -1,4 +1,4 @@
-module CoreParser(Parser, char, return, fail, (#), (!), (?), (#>), (>->),
+  module CoreParser(Parser, char, return, fail, (#), (!), (?), (#>), (>->),
                   Parse, parse, toString, fromString) where
 import Prelude hiding (return, fail)
 infixl 3 ! 

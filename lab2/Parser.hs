@@ -17,10 +17,10 @@ iter m = m # iter m >-> cons ! return []
 cons(a, b) = a:b
 
 (-#) :: Parser a -> Parser b -> Parser b
-m -# n = error "-# not implemented"
+(m -# n) cs = (m # n >-> snd) cs
 
 (#-) :: Parser a -> Parser b -> Parser a
-m #- n = error "#- not implemented"
+(m #- n) cs = (m # n >-> fst) cs
 
 spaces :: Parser String
 spaces =  error "spaces not implemented"
@@ -29,7 +29,7 @@ token :: Parser a -> Parser a
 token m = m #- spaces
 
 letter :: Parser Char
-letter =  error "letter not implemented"
+letter string = (char ? isLetter) string
 
 word :: Parser String
 word = token (letter # iter letter >-> cons)
