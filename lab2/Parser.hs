@@ -3,6 +3,7 @@ module Parser(module CoreParser, T, digit, digitVal, chars, letter, err,
               spaces, word, (-#), (#-)) where
 import Prelude hiding (return, fail)
 import Data.Char
+import Data.Maybe
 import CoreParser
 infixl 7 -#, #- 
 
@@ -47,13 +48,13 @@ chars n m = (iterInt CoreParser.char) n m
 accept :: String -> Parser String
 accept w = (token (chars (length w))) ? (==w)
 
---require :: String -> Parser String
---require w  = accept error "require not implemented"
+require :: String -> Parser String
+require m = (accept m) ! (err m)
 
-errorMsg :: Parser String -> String
-errorMsg m 
-	|m == Nothing = "error sister"
-	|Otherwise = "ok sis"
+--errorMsg :: Parser String -> String
+--errorMsg m = "hej"
+--	|m == Data.Maybe.isNothing = error "sister"
+--	|otherwise = "ok sis"
 
 
 lit :: Char -> Parser Char
