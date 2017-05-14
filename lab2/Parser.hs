@@ -14,6 +14,10 @@ err message cs = error (message++" near "++cs++"\n")
 iter :: Parser a -> Parser [a]  
 iter m = m # iter m >-> cons ! return [] 
 
+iterInt :: Parser a -> Int -> Parser [a]
+iterInt m 0 = CoreParser.return []
+iterInt m i = m # iterInt m (i - 1) >-> cons
+
 cons(a, b) = a:b
 
 (-#) :: Parser a -> Parser b -> Parser b
@@ -22,8 +26,11 @@ cons(a, b) = a:b
 (#-) :: Parser a -> Parser b -> Parser a
 (m #- n) cs = (m # n >-> fst) cs
 
+space :: Parser Char
+space m = (char ? isSpace) m
+
 spaces :: Parser String
-spaces =  error "spaces not implemented"
+spaces =  iter space
 
 token :: Parser a -> Parser a
 token m = m #- spaces
@@ -35,13 +42,19 @@ word :: Parser String
 word = token (letter # iter letter >-> cons)
 
 chars :: Int -> Parser String
-chars n =  error "chars not implemented"
+chars n m = (iterInt CoreParser.char) n m
 
 accept :: String -> Parser String
 accept w = (token (chars (length w))) ? (==w)
 
-require :: String -> Parser String
-require w  = error "require not implemented"
+--require :: String -> Parser String
+--require w  = accept error "require not implemented"
+
+errorMsg :: Parser String -> String
+errorMsg m 
+	|m == Nothing = "error sister"
+	|Otherwise = "ok sis"
+
 
 lit :: Char -> Parser Char
 lit c = token char ? (==c)
