@@ -8,7 +8,11 @@ newtype T = Program [Statement.T] -- to be defined
 
 instance Parse T where
   parse = iter Statement.parse >-> Program
-  toString = error "Program.toString not implemented"
+  toString = convertToString
+  	where
+  		convertToString :: T -> String
+  		convertToString (Program []) = ""
+  		convertToString (Program [stmt : stmts]) = convertToString 
              
 exec :: T -> [Integer] -> [Integer]
 exec (Program p) allowedInts = Statement.exec p dict allowedInts
