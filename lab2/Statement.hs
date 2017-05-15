@@ -67,6 +67,7 @@ exec (Skip : stmts) dict input = exec stmts dict input
 exec (Begin beginStmts : stmts) dict input = exec (beginStmts ++ stmts) dict input
 
 stringStmt :: T -> String
+
 stringStmt (Assignment varName value) = v ++ " := " ++ toString e ++ ";\n"
 
 stringStmt (If cond thenStmts elseStmts) = "if " ++ toString cond ++ " then\n" 
@@ -79,6 +80,9 @@ stringStmt (Read varName) = "read " ++ varName ++ ";\n"
 stringStmt (Write value) = "write " ++ toString value ++ ";\n"
 
 stringStmt (Skip) = "skip;\n"
+
+stringStmt (Begin beginStmts) = "begin\n" ++ stringStmt beginStmts ++ "end\n"
+
 instance Parse Statement where
   parse = statement
 
