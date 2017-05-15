@@ -12,6 +12,9 @@ type T a = Parser a
 err :: String -> Parser a
 err message cs = error (message++" near "++cs++"\n")
 
+--iterList :: Parser a -> Parser [a]  
+--iter m = m # iter m >-> cons ! return [] 
+
 iter :: Parser a -> Parser [a]  
 iter m = m # iter m >-> cons ! return [] 
 

@@ -73,10 +73,21 @@ shw prec (Div t u) = parens (prec>6) (shw 6 t ++ "/" ++ shw 7 u)
 
 value :: Expr -> Dictionary.T String Integer -> Integer
 value (Num n) _ = n
---value (Var v) dict = 0 + ((Dictionary.lookup v dict) ? isJust(Dictionary.lookup v dict) == True)
---value (Add t u) = Add (Num t) (Num u)
---value (Var v) dict = 
---value (Num n) _ = Dictionary.lookup 
+value (Var v) dict = errLookup (Var v) dict
+value (Add t u) dict = (value t dict) + (value u dict)
+value (Sub t u) dict = (value t dict) - (value u dict)
+value (Mul t u) dict = (value t dict) * (value u dict)
+value (Div t u) dict = errDiv (value t dict) (value u dict)
+
+errLookup :: Expr -> Dictionary.T String Integer -> Integer
+errLookup e dict 
+  |isNothing(Dictionary.lookup (shw 5 e) dict) == True = error "No such variable exists!"
+  |otherwise = fromJust(Dictionary.lookup (shw 5 e) dict)
+
+errDiv :: Integer -> Integer -> Integer
+errDiv n m
+  |(m /= 0) = div n m
+  |otherwise = error "Division by zero!"
 
 instance Parse Expr where
     parse = expr
