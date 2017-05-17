@@ -12,7 +12,8 @@ data Statement =
     Read String |
     Write Expr.T |
     Skip |
-    Begin [Statement]
+    Begin [Statement] |
+    Repeat Statement Expr.T
     deriving Show
 
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
@@ -37,9 +38,14 @@ buildSkip _ = Skip
 begin = accept "begin" -# iter statement #- require "end" >-> buildBegin
 buildBegin a = Begin a
 
-statement = assignment ! if1 ! while ! read1 ! write ! skip ! begin
+repeat1 = accept "repeat" -# statement # require "until" -# Expr.parse #- require ";" >-> buildRepeat
+buildRepeat (a, b) = Repeat a b
+
+statement = assignment ! if1 ! while ! read1 ! write ! skip ! begin ! repeat1
 
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
+exec [] dict input = []
+
 exec (Assignment varName value : stmts) dict input = exec stmts newDict input
 	where
 		newDict = Dictionary.insert (varName, Expr.value value dict) dict
@@ -51,14 +57,14 @@ exec (If cond thenStmts elseStmts: stmts) dict input =
 
 exec (While cond stmt : stmts) dict input = 
     if (Expr.value cond dict)>0 
-    then exec (stmt : stmts) dict input
+	then exec (stmt : While cond stmt : stmts) dict input
     else exec stmts dict input    
 
-exec (Read varName : stmts) dict input = exec stmts dict newInput
+exec (Read varName : stmts) dict (usedNr : numbers) = exec stmts newDict numbers
 	where
-		newInput = newInput ++ [fromJust(Dictionary.lookup varName dict)]
+		newDict = Dictionary.insert (varName, usedNr) dict
 
-exec (Write value : stmts) dict input = exec stmts dict input ++ [val]
+exec (Write value : stmts) dict input = (val : exec stmts dict input)
 	where
 		val = Expr.value value dict
 
@@ -66,22 +72,33 @@ exec (Skip : stmts) dict input = exec stmts dict input
 
 exec (Begin beginStmts : stmts) dict input = exec (beginStmts ++ stmts) dict input
 
+exec (Repeat stmt cond : stmts) dict input = 
+    exec (stmt : ((If cond Skip (Repeat stmt cond)): stmts)) dict input
+
+
 stringStmt :: T -> String
 
-stringStmt (Assignment varName value) = v ++ " := " ++ toString e ++ ";\n"
+stringStmt (Assignment varName value) = varName ++ " := " ++ toString value ++ ";"
 
 stringStmt (If cond thenStmts elseStmts) = "if " ++ toString cond ++ " then\n" 
 	++ stringStmt thenStmts ++ "else\n" ++ stringStmt elseStmts
 
 stringStmt (While cond stmt) = "while " ++ toString cond ++ " do\n" ++ stringStmt stmt
 
-stringStmt (Read varName) = "read " ++ varName ++ ";\n"
+stringStmt (Read varName) = "read " ++ varName ++ ";"
 
 stringStmt (Write value) = "write " ++ toString value ++ ";\n"
 
 stringStmt (Skip) = "skip;\n"
 
-stringStmt (Begin beginStmts) = "begin\n" ++ stringStmt beginStmts ++ "end\n"
+stringStmt (Begin stmts) = "begin\n" ++ stringStmtList stmts ++ "\nend"
+
+stringStmt (Repeat stmt cond) = "repeat\n" ++ stringStmt stmt ++ "until " ++ toString cond ++ ";"
+
+stringStmtList :: [T] -> String
+stringStmtList [] = ""
+stringStmtList (x : xs) = stringStmt x ++ stringStmtList xs
+
 
 instance Parse Statement where
   parse = statement
