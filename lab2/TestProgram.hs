@@ -46,6 +46,8 @@ p2 = fromString  ("\
 \write s;")
 
 sp = putStr (toString p)
+sp1 = putStr (toString p1)
+sp2 = putStr (toString p2)
 
 rp = Program.exec p [3,16]
 

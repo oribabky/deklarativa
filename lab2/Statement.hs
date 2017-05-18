@@ -78,22 +78,22 @@ exec (Repeat stmt cond : stmts) dict input =
 
 stringStmt :: T -> String
 
-stringStmt (Assignment varName value) = varName ++ " := " ++ toString value ++ ";"
+stringStmt (Assignment varName value) = varName ++ " := " ++ toString value ++ ";\n"
 
 stringStmt (If cond thenStmts elseStmts) = "if " ++ toString cond ++ " then\n" 
 	++ stringStmt thenStmts ++ "else\n" ++ stringStmt elseStmts
 
 stringStmt (While cond stmt) = "while " ++ toString cond ++ " do\n" ++ stringStmt stmt
 
-stringStmt (Read varName) = "read " ++ varName ++ ";"
+stringStmt (Read varName) = "read " ++ varName ++ ";\n"
 
 stringStmt (Write value) = "write " ++ toString value ++ ";\n"
 
 stringStmt (Skip) = "skip;\n"
 
-stringStmt (Begin stmts) = "begin\n" ++ stringStmtList stmts ++ "\nend"
+stringStmt (Begin stmts) = "begin\n" ++ stringStmtList stmts ++ "end\n"
 
-stringStmt (Repeat stmt cond) = "repeat\n" ++ stringStmt stmt ++ "until " ++ toString cond ++ ";"
+stringStmt (Repeat stmt cond) = "repeat\n" ++ stringStmt stmt ++ "until " ++ toString cond ++ ";\n"
 
 stringStmtList :: [T] -> String
 stringStmtList [] = ""

@@ -12,7 +12,7 @@ instance Parse T where
   	where
   		convertToString :: T -> String
   		convertToString (Program []) = ""
-  		convertToString (Program (stmt : stmts)) = Statement.toString stmt ++ ['\n'] ++ convertToString (Program stmts) 
+  		convertToString (Program (stmt : stmts)) = Statement.toString stmt ++ convertToString (Program stmts) 
              
 exec :: T -> [Integer] -> [Integer]
 exec (Program p) allowedInts = Statement.exec p dict allowedInts
