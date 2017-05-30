@@ -54,10 +54,7 @@ accept w = (token (chars (length w))) ? (==w)
 require :: String -> Parser String
 require m = (accept m) ! (err m)
 
---errorMsg :: Parser String -> String
---errorMsg m = "hej"
---	|m == Data.Maybe.isNothing = error "sister"
---	|otherwise = "ok sis"
+
 
 
 lit :: Char -> Parser Char

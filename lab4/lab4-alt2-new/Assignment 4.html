@@ -1,0 +1,106 @@
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=windows-1252"></head><body>`
+
+
+<meta http-equiv="Content-Language" content="en-us">
+<meta name="GENERATOR" content="Microsoft FrontPage 5.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Assignment 4</title>
+
+
+
+
+<h1 align="center">EECS 3401 Winter 2017 Assignment 4</h1>
+<p align="center"><font color="#008000">Available March 27</font>.
+<font color="#FF0000">&nbsp;Due April 5 at 23:55. </font></p>
+
+
+
+<h3>Files for Assignment 4</h3>
+<ol>
+  <li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/asg4.pdf">PDF handout</a>.</li>
+  <li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/coverpage.txt">coverpage.txt</a>: a cover page to put on top of
+  what you hand in.</li>
+  <li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/othello.swi">othello.swi</a>: starter code for your Othello implementation.</li>
+  <li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/play.swi">play.swi</a>: interactive game tree search engine (using plain minimax depth-first search).</li>
+ <li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/testboards.swi">testboards.swi</a> and
+ <a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/testboards.pdf">testboards.pdf</a>:
+ The first file contains three test boards in PROLOG format.
+ You are to run some evaluations on these as stated in
+ <tt>testboard.pdf</tt>.  First, run your minimax implementation on the
+ test boards and fill in the first table. Secondly, if you have implemented
+ alpha-beta search, run your alpha-beta implementation on the
+ test boards and fill in the second table.  In this case, also write one or two
+ paragraphs on page 2, discussing your results in the two tables.
+  </li><li><a href="http://www.eecs.yorku.ca/course_archive/2016-17/W/3401/asg4/ttt.swi">ttt.swi</a>: example implementation of the
+ tic-tac-toe game showing how the game tree search engine can be used.</li>
+</ol>
+
+Note that the <tt>.pl</tt> files have been renamed <tt>.swi</tt> so
+that our web server will let you download them.
+
+<h3>FAQ</h3>
+
+<ul>
+<li> From N.B.:
+<i>I'm just wondering about the initBoard predicate, you defined the board to
+be</i><br>
+<tt>
+[. . . . . .]<br>
+[. . . . . .]<br>
+[. . 1 2 . .]<br>
+[. . 2 1 . .]<br>
+[. . . . . .]<br>
+[. . . . . .]<br>
+</tt>
+<i>and since player 1 is the human and player 2 is the computer wouldn't that
+mean that player 1 is white but in the description of the assignment black
+is supposed to move first. Shouldn't the board be</i><br>
+<tt>
+[. . . . . .] <br>
+[. . . . . .]<br>
+[. . 2 1 . .]<br>
+[. . 1 2 . .]<br>
+[. . . . . .]<br>
+[. . . . . .]<br>
+</tt>
+<p>
+Use the initial configuration contained in the starter code. Note that the
+row numbering used in the figures in the handout is bottom-to-top. So, if
+you flip the board in the figures vertically you get the configuration used
+in the starter code. (Of course the starter code uses a 6x6 board).
+In addition, Player 1 (Human) plays first.
+</p><p>
+</p></li><li> From N.B.:
+<i>I have a question about the ordering of MvList. In the assignment you say
+that the list should be sorted left to right, top to bottom, but since in
+the code the pair <tt>[X, Y]</tt> denotes column <tt>X</tt> and row <tt>Y</tt>
+this would mean that the given list represents this type of matirx</i><br>
+<tt>[0,0] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [1,1] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[0,2] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [1,5] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]<br>
+[_,_] [2,7] [_,_] [_,_] [_,_] [_,_] [_,_] [_,_]</tt><br>
+<i>So that would mean that the list is sorted top to bottom, left to right
+not the other way around so I'm just wondering if this is the right
+interpretation or are we supposed to take the pair <tt>[X, Y]</tt>
+to mean row <tt>X</tt> and column <tt>Y</tt>.</i>
+<p>
+<tt>[X,Y]</tt> in the handout refers to column <tt>X</tt> and row <tt>Y</tt> (each between 0 and 5).
+So, for example the up position (i.e. fix the column but go one row up) for
+<tt>[3,2]</tt> is <tt>[3,1]</tt>. The order we are looking for the
+moves is first all moves in
+column 1 then column 2 and so on where the order in each column is top to
+bottom. So, we get <tt>[0,0],[0,1],...,[0,5], [1,0],...,[1,5],...
+[5,0],...,[5,5]</tt>.
+</p></li></ul>
+
+
+
+
+</body></html>

@@ -16,6 +16,8 @@ data Statement =
     Repeat Statement Expr.T
     deriving Show
 
+--Build Statement types from parsed code.
+
 assignment = word #- accept ":=" # Expr.parse #- require ";" >-> buildAss
 buildAss (v, e) = Assignment v e
 
@@ -43,6 +45,7 @@ buildRepeat (a, b) = Repeat a b
 
 statement = assignment ! if1 ! while ! read1 ! write ! skip ! begin ! repeat1
 
+--Translate statements to haskell functionality
 exec :: [T] -> Dictionary.T String Integer -> [Integer] -> [Integer]
 exec [] dict input = []
 
