@@ -73,8 +73,10 @@ initBoard([ [.,.,.,.,.,.],
 
 initialize(InitialState, 1):-
 	initBoard(InitialState).
+
+%try another board
 %initialize(InitialState, 1):-
-%	testBoard5(InitialState).
+%	testBoard11(InitialState).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%winner(...)%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -90,7 +92,7 @@ winner(State, Plyr) :-
 	countSumWeightsPlayer(State, OtherPlyr, OtherPlyrSum),
 	PlyrSum < OtherPlyrSum.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%Count occurrences%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%% Count weights/tiles%%%%%%%%%%%%%%%%%%%
 
 countSumWeightsRow( [], _, 0).
 
@@ -109,7 +111,7 @@ countSumWeightsPlayer( [Row|Rows], Plyr, Sum) :-
 	countSumWeightsPlayer( Rows, Plyr, RestSum),
 	Sum is RestSum + RowSum.
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%Count occurrences%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%% Count weights/tiles%%%%%%%%%%%%%%%%%%%%
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%tie(...)%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
@@ -158,11 +160,7 @@ printList([H | L]) :-
 	printList(L).
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%moves(Plyr,State,MvList)%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%
-%% define moves(Plyr,State,MvList).
-%   - returns list MvList of all legal moves Plyr can make in State
-%
+%%%%%translation of positions (1-36) to board coordinates.
 
 position(1, X) :- X = [0,0].
 position(2, X) :- X = [1,0].
@@ -201,21 +199,34 @@ position(34, X) :- X = [3,5].
 position(35, X) :- X = [4,5].
 position(36, X) :- X = [5,5].
 
+position([A,B], X) :-
+    X = [A,B],
+    A >= 0,
+    A =< 5,
+    B >= 0,
+    B =< 5.
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%moves(Plyr,State,MvList)%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%
+%% define moves(Plyr,State,MvList).
+%   - returns list MvList of all legal moves Plyr can make in State
+%
 
 
 noAvailableMoves(State, Plyr) :-
 	moves(Plyr, State, MvList),
-        member('n', MvList).
+        member(n, MvList).
 
 moves(Plyr,State,MvList) :-
   testmoves(Plyr, 36,State,[],MvList),
-%if there are no available moves:
+
+% if there are no available moves:
   length(MvList, Len),
   Len > 0, !
   ;
   append([], ['n'], MvList).
 
-
+%%%%%test all possible moves
 testmoves(Plyr, Pos,St,SoFar,MvList) :-
   Pos > 0,
   validmove(Plyr,St,Pos), !,
@@ -252,8 +263,14 @@ nextState(Plyr, Move, State, State9, NextPlyr) :-
 	flipTilesDown(State7, Plyr, Coords, State8),
 	flipTilesDownRight(State8, Plyr, Coords, State9).
 
-%these functions will flip all opposite tiles to the right, until a tile
-%of the same color is found
+
+% these functions will flip all opposite tiles in a given direction
+% if the next tile belongs to the opposite player and a tile of the same
+% player is found further along the direction.
+%
+
+% fliptiles always succeeds. It will return the original state if tiles
+% cannot be flipped along a path.
 flipTilesRight(State, Plyr, Coords, FinalState) :-
 	nextRight(Coords, NextCoords),
 	get( State, NextCoords, NextValue),
@@ -433,6 +450,9 @@ flipDownRight(_, _, _, _, OriginalState, FinalState) :-
 %% define validmove(Plyr,State,Proposed).
 %   - true if Proposed move by Plyr is valid at State.
 
+%
+%These relations give the next coordinate in a given direction.
+%
 nextRight([X1,Y], [X2,Y]) :-
 	X2 is X1 + 1,
 	X2 =< 5.
@@ -466,6 +486,9 @@ nextDownRight([X1, Y1], [X2, Y2]) :-
 	Y2 is Y1 + 1,
 	Y2 =< 5.
 
+%
+%These recursive functions finds a player in a given direction
+%
 findPlyrRight(_, Plyr, _, Plyr).
 findPlyrRight(State, Plyr, Cord, Value) :-
 	player(Value),
@@ -530,7 +553,9 @@ findPlyrDownRight(State, Plyr, Cord, Value) :-
 	get( State, NextCord, NextValue),
 	findPlyrDownRight( State, Plyr, NextCord, NextValue).
 
-
+%
+%These functions checks that a tile placement is ok in a given direction
+%
 
 okRight(Plyr, OppPlyr, State, Coords) :-
 	nextRight(Coords, NextCord), %check that the next tile is
@@ -598,7 +623,9 @@ okDownRight(Plyr, OppPlyr, State, Coords) :-
 
 
 %checks for a valid move, given a certain pos.
-validmove(_, _, 'n').
+validmove(Plyr, State, 'n') :-
+    noAvailableMoves(State, Plyr).
+
 validmove(Plyr, State, ProposedPos) :-
 	%check that the position is empty
 	position(ProposedPos, Coords),
@@ -638,16 +665,32 @@ h(State,101) :- winner(State,1), !. %MAX
 h(State,-101) :- winner(State,2), !. %MIN
 h(State,0) :- tie(State), !.
 
+% AI tactic is to ensure that the other player has as many moves
+% available as possible.
 h(State, Val) :-
     moves(1,State,MvListPlyr1),
     moves(2, State, MvListPlyr2),
-    length(MvListPlyr1, NrMovesPlyr1),
-    length(MvListPlyr2, NrMovesPlyr2),
+   % length(MvListPlyr1, NrMovesPlyr1),
+   % length(MvListPlyr2, NrMovesPlyr2),
+   nrMoves(MvListPlyr1),
+   nrMoves(MvListPlyr2),
     different(NrMovesPlyr1, NrMovesPlyr2),
+
+    %tactic of AI to ensure that the other player has as many moves as possible.
     Val is (100 * (NrMovesPlyr2 - NrMovesPlyr1) / (NrMovesPlyr1 + NrMovesPlyr2)),
+
+    %the other tactic to ensure the other player has as few moves as possible:
+    %Val is (100 * (NrMovesPlyr1 - NrMovesPlyr2) / (NrMovesPlyr1 + NrMovesPlyr2)),
     !.
 
 h(_, 0).
+
+nrMoves(MvList, Nr) :-
+    member('n', MvList),
+    Nr is 0.
+
+nrMoves(MvList, Nr) :-
+    length(MvList, Nr).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%lowerBound(B)%%%%%%%%%%%%%%%%%%%%%%%%%
 %%
